@@ -319,6 +319,7 @@
     .app { padding-bottom: 64px; }
     header { padding: 10px 14px; }
     header > div:first-child .logo { font-size: 20px; }
+    header > div:first-child svg { width: 140px; height: 32px; }
     header > div:first-child span { display: none; }
     main { padding: 12px; }
     .two-col { grid-template-columns: 1fr !important; }
@@ -456,9 +457,17 @@
 <div class="app">
 
 <header>
-  <div>
-    <div class="logo">TOPSET</div>
-    <span style="font-size:11px;color:var(--text3);letter-spacing:0.5px;font-family:'DM Sans',sans-serif;">Your training, your data</span>
+  <div style="display:flex;align-items:center;">
+    <svg width="200" height="44" viewBox="0 24 680 136" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+      <style>@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');</style>
+      <rect x="52" y="44" width="14" height="112" rx="0" fill="#e8ff47"/>
+      <rect x="10" y="44" width="100" height="5" rx="2.5" fill="#e8ff47"/>
+      <rect x="10" y="28" width="9" height="36" rx="3" fill="#e8ff47"/>
+      <rect x="0" y="34" width="7" height="24" rx="3" fill="#e8ff47"/>
+      <rect x="101" y="28" width="9" height="36" rx="3" fill="#e8ff47"/>
+      <rect x="113" y="34" width="7" height="24" rx="3" fill="#e8ff47"/>
+      <text x="72" y="156" font-family="'Bebas Neue', sans-serif" font-size="112" letter-spacing="1" fill="#e8ff47">OPSET</text>
+    </svg>
   </div>
   <nav>
     <button class="nav-btn active" onclick="showView('dashboard',this)">Dashboard</button>
@@ -825,9 +834,9 @@
       <div class="guide-card-icon">🧠</div>
       <div class="guide-card-title">Fatigue-Aware Overload Hints</div>
       <div class="guide-card-body">
-        When you add an exercise to a session, Topset looks at the <strong>last time you logged that exercise</strong> and compares how many same-muscle exercises came before it then vs. now.<br><br>
-        It then calculates a <strong>fatigue-adjusted target weight and rep count</strong> — not just a direction, but a specific number. Each extra same-muscle exercise beforehand applies a ~3.5% downward adjustment to the suggested weight; going in fresher bumps it up by the same amount, up to ±10%.<br><br>
-        The hint shows your <strong>target for today</strong> prominently, with last session's numbers for reference. A blue delta means you're fresher than last time; orange means more pre-fatigued. The set weight fields are pre-filled with the adjusted target.
+        When you add an exercise to a session, Topset compares today's session to the last time you did it — including <strong style="color:var(--text);">how many same-muscle exercises came before it</strong>.<br><br>
+        It then calculates a <strong style="color:var(--text);">fatigue-adjusted target weight and rep count</strong>. Each extra same-muscle exercise beforehand applies a ~3.5% downward adjustment; going in fresher bumps it up, up to ±10%.<br><br>
+        It also looks back <strong style="color:var(--text);">48 hours</strong> at recent sessions. A run yesterday, a heavy leg day this morning, or any training in the last two days applies an additional residual fatigue reduction — up to 15% — depending on how recent it was and how much muscle overlap there is. Cardio sessions apply a smaller systemic reduction across all lifts.
       </div>
     </div>
 
@@ -893,7 +902,16 @@
 
     <!-- Step 1: Welcome -->
     <div id="ob-step-1">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;">TOPSET</div>
+      <svg width="220" height="48" viewBox="0 24 680 136" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:6px;display:block;">
+        <style>@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');</style>
+        <rect x="52" y="44" width="14" height="112" rx="0" fill="#e8ff47"/>
+        <rect x="10" y="44" width="100" height="5" rx="2.5" fill="#e8ff47"/>
+        <rect x="10" y="28" width="9" height="36" rx="3" fill="#e8ff47"/>
+        <rect x="0" y="34" width="7" height="24" rx="3" fill="#e8ff47"/>
+        <rect x="101" y="28" width="9" height="36" rx="3" fill="#e8ff47"/>
+        <rect x="113" y="34" width="7" height="24" rx="3" fill="#e8ff47"/>
+        <text x="72" y="156" font-family="'Bebas Neue', sans-serif" font-size="112" letter-spacing="1" fill="#e8ff47">OPSET</text>
+      </svg>
       <div style="font-size:15px;color:var(--text);font-weight:600;margin-bottom:10px;">The training tracker for people who actually lift.</div>
       <div style="font-size:13px;color:var(--text2);line-height:1.75;margin-bottom:24px;">
         No account. No subscription. No cloud.<br>
@@ -1001,52 +1019,87 @@
 <!-- SESSION MODAL -->
 <div class="modal-overlay" id="session-modal">
   <div class="modal">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <h2 id="modal-title">New Session</h2>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" id="session-date">
-      </div>
-      <div class="form-group">
-        <label>Session Name / Focus</label>
-        <input type="text" id="session-name" placeholder="e.g. Push Day #1, Leg Day…" oninput="updateProgSessionBanner()">
+
+    <!-- Header row: title + save to library icon -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 id="modal-title" style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;">New Session</h2>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="saveAsTemplate()" title="Save as workout template" style="background:none;border:1px solid rgba(232,255,71,0.25);color:var(--accent);border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">💾 Save to Library</button>
+        <button onclick="closeModal()" style="background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;line-height:1;padding:0 4px;">×</button>
       </div>
     </div>
-    <div class="form-group">
-      <label>Tags (comma-separated)</label>
-      <input type="text" id="session-tags" placeholder="push, chest, triceps">
+
+    <!-- Session name — prominent, always visible -->
+    <div class="form-group" style="margin-bottom:10px;">
+      <input type="text" id="session-name" placeholder="Session name (e.g. Push Day, Leg Day…)"
+        style="font-size:16px;font-weight:500;"
+        oninput="updateProgSessionBanner()">
     </div>
-    <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-      <label style="font-size:12px;color:var(--text2);letter-spacing:0.5px;text-transform:uppercase;font-weight:500;">Exercises <span class="tip-icon" style="text-transform:none;letter-spacing:0;">?<span class="tip-popup" style="left:0;transform:none;">Log each set with reps and weight. Append <strong>f</strong> to mark a failed set (e.g. 8f) — excluded from PRs. The hint under each exercise shows whether to push, hold, or back off based on fatigue vs. last time.</span></span></label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn-ghost btn-sm" onclick="openLibraryPicker()" style="font-size:11px;">📋 Browse Library</button>
-        <select class="filter-select" id="copy-session-select" onchange="copyFromSession(this.value)" style="font-size:11px;">
-          <option value="">Copy from previous session…</option>
-        </select>
+
+    <!-- Collapsible details: date + tags -->
+    <div id="session-details-toggle" onclick="toggleSessionDetails()"
+      style="font-size:11px;color:var(--text3);cursor:pointer;margin-bottom:10px;display:flex;align-items:center;gap:4px;user-select:none;">
+      <span id="session-details-chevron" style="font-size:9px;transition:transform 0.2s;">▶</span>
+      <span>Date &amp; tags</span>
+    </div>
+    <div id="session-details-panel" style="display:none;margin-bottom:12px;">
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Date</label>
+          <input type="date" id="session-date">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Tags</label>
+          <input type="text" id="session-tags" placeholder="push, chest, triceps">
+        </div>
       </div>
     </div>
-    <!-- Recent exercises quick-tap shelf -->
-    <div id="recent-ex-shelf" style="display:none;margin-bottom:10px;">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px;">Recent</div>
-      <div id="recent-ex-pills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-    </div>
-    <div id="exercises-container"></div>
+
+    <!-- Quick-start: last session button -->
+    <div id="quick-start-bar" style="display:none;margin-bottom:12px;"></div>
+
     <!-- Program session match banner -->
-    <div id="prog-session-banner" style="display:none;margin:8px 0;padding:10px 14px;background:rgba(91,159,255,0.07);border:1px solid rgba(91,159,255,0.2);border-radius:8px;align-items:center;gap:10px;flex-wrap:wrap;">
+    <div id="prog-session-banner" style="display:none;margin-bottom:10px;padding:10px 14px;background:rgba(91,159,255,0.07);border:1px solid rgba(91,159,255,0.2);border-radius:8px;align-items:center;gap:10px;flex-wrap:wrap;">
       <span id="prog-session-banner-text" style="font-size:12px;color:var(--blue);font-family:'DM Mono',monospace;flex:1;min-width:160px;"></span>
       <span class="tip-icon" style="flex-shrink:0;">?<span class="tip-popup" style="left:auto;right:0;transform:none;">Topset matched this session to your active program by name. The target weight/reps shown in each exercise block account for which cycle you're on. Use the dropdown to override if the auto-match is wrong.</span></span>
       <select id="prog-session-override" onchange="updateProgSessionOverride()" style="font-size:11px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);border-radius:4px;padding:3px 6px;font-family:'DM Mono',monospace;"></select>
     </div>
-    <button class="add-ex-btn" onclick="addExerciseRow()">+ Add Exercise</button>
-    <div class="form-group">
-      <label>Session Notes</label>
-      <textarea id="session-notes" placeholder="How did it feel? Any observations…"></textarea>
+
+    <!-- Exercises label + actions -->
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <label style="font-size:11px;color:var(--text3);letter-spacing:0.8px;text-transform:uppercase;font-weight:500;">Exercises</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-ghost btn-sm" onclick="openLibraryPicker()" style="font-size:11px;">📋 Library</button>
+        <select class="filter-select" id="copy-session-select" onchange="copyFromSession(this.value)" style="font-size:11px;">
+          <option value="">Copy previous…</option>
+        </select>
+      </div>
     </div>
+
+    <!-- Recent exercises shelf -->
+    <div id="recent-ex-shelf" style="display:none;margin-bottom:10px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px;">Recent</div>
+      <div id="recent-ex-pills" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- Exercise blocks -->
+    <div id="exercises-container"></div>
+
+    <button class="add-ex-btn" onclick="addExerciseRow()">+ Add Exercise</button>
+
+    <!-- Notes — collapsible -->
+    <div id="session-notes-toggle" onclick="toggleSessionNotes()"
+      style="font-size:11px;color:var(--text3);cursor:pointer;margin:8px 0 4px;display:flex;align-items:center;gap:4px;user-select:none;">
+      <span id="session-notes-chevron" style="font-size:9px;transition:transform 0.2s;">▶</span>
+      <span>Add session notes</span>
+    </div>
+    <div id="session-notes-panel" style="display:none;margin-bottom:8px;">
+      <textarea id="session-notes" placeholder="How did it feel? Any observations…" style="min-height:80px;"></textarea>
+    </div>
+
+    <!-- Footer: just cancel + save -->
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn-ghost" onclick="saveAsTemplate()" style="color:var(--accent);border-color:rgba(232,255,71,0.3);">Save to Library</button>
       <button class="btn-primary" onclick="saveSession()">Save Session</button>
     </div>
   </div>
@@ -1537,6 +1590,63 @@ function estRM(weight, reps, targetReps) {
 }
 
 // ===== SESSION MODAL =====
+function toggleSessionDetails() {
+  const panel = document.getElementById('session-details-panel');
+  const chevron = document.getElementById('session-details-chevron');
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+function toggleSessionNotes() {
+  const panel = document.getElementById('session-notes-panel');
+  const chevron = document.getElementById('session-notes-chevron');
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+function renderQuickStartBar() {
+  const bar = document.getElementById('quick-start-bar');
+  if (!bar) return;
+  if (!data.sessions.length) { bar.style.display = 'none'; return; }
+  const recent = data.sessions.slice(0, 5);
+  bar.style.display = 'block';
+  bar.innerHTML = `
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px;">Quick start from previous session</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${recent.map(s => {
+        const label = s.name || new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const dateStr = new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const exCount = (s.exercises||[]).length;
+        return `<button onclick="quickStartFromSession('${s.id}')"
+          style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;transition:all 0.15s;"
+          onmouseover="this.style.borderColor='rgba(232,255,71,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-weight:500;">${label}</span>
+          <span style="font-size:11px;color:var(--text3);white-space:nowrap;">${dateStr} · ${exCount} ex</span>
+        </button>`;
+      }).join('')}
+    </div>`;
+}
+
+function quickStartFromSession(id) {
+  const s = data.sessions.find(x => x.id === id);
+  if (!s) return;
+  const container = document.getElementById('exercises-container');
+  container.innerHTML = '';
+  document.getElementById('session-name').value = s.name || '';
+  document.getElementById('session-tags').value = (s.tags||[]).join(', ');
+  if (s.name) updateProgSessionBanner();
+  (s.exercises||[]).forEach(ex => {
+    const last = getLastLoggedEx(ex.name);
+    addExerciseRowWithHint(ex, last);
+  });
+  // Hide quick-start bar after use
+  const bar = document.getElementById('quick-start-bar');
+  if (bar) bar.style.display = 'none';
+  showToast('Loaded from: ' + (s.name || s.date));
+}
+
 function openModal(sessionId) {
   editingSessionId = sessionId || null;
   const container = document.getElementById('exercises-container');
@@ -1545,6 +1655,12 @@ function openModal(sessionId) {
   populateRecentShelf();
   setTimeout(updateProgSessionBanner, 50);
 
+  // Reset collapsibles
+  const detailsPanel = document.getElementById('session-details-panel');
+  const notesPanel = document.getElementById('session-notes-panel');
+  const detailsChevron = document.getElementById('session-details-chevron');
+  const notesChevron = document.getElementById('session-notes-chevron');
+
   if (sessionId) {
     const s = data.sessions.find(x => x.id === sessionId);
     document.getElementById('modal-title').textContent = 'Edit Session';
@@ -1552,6 +1668,14 @@ function openModal(sessionId) {
     document.getElementById('session-name').value = s.name || '';
     document.getElementById('session-tags').value = (s.tags||[]).join(', ');
     document.getElementById('session-notes').value = s.notes || '';
+    // Show details panel when editing
+    if (detailsPanel) { detailsPanel.style.display = 'block'; detailsChevron.style.transform = 'rotate(90deg)'; }
+    // Show notes if there are any
+    if (notesPanel) {
+      notesPanel.style.display = s.notes ? 'block' : 'none';
+      if (notesChevron) notesChevron.style.transform = s.notes ? 'rotate(90deg)' : '';
+    }
+    document.getElementById('quick-start-bar').style.display = 'none';
     (s.exercises||[]).forEach(ex => addExerciseRow(ex));
   } else {
     document.getElementById('modal-title').textContent = 'New Session';
@@ -1559,6 +1683,10 @@ function openModal(sessionId) {
     document.getElementById('session-name').value = '';
     document.getElementById('session-tags').value = '';
     document.getElementById('session-notes').value = '';
+    // Collapse details and notes for new sessions
+    if (detailsPanel) { detailsPanel.style.display = 'none'; detailsChevron.style.transform = ''; }
+    if (notesPanel) { notesPanel.style.display = 'none'; if (notesChevron) notesChevron.style.transform = ''; }
+    renderQuickStartBar();
     addExerciseRow();
   }
   document.getElementById('session-modal').classList.add('open');
@@ -1893,7 +2021,7 @@ function onRepInput(input) {
 }
 
 function saveSession() {
-  const date = document.getElementById('session-date').value;
+  const date = document.getElementById('session-date').value || new Date().toISOString().split('T')[0];
   if (!date) { showToast('Please set a date'); return; }
   const blocks = document.querySelectorAll('#exercises-container .exercise-block');
   const exercises = [];
@@ -2325,17 +2453,85 @@ function getLastLoggedEx(exName) {
   return null;
 }
 
+// ===== 48-HOUR CROSS-SESSION FATIGUE =====
+function getRecent48HrFatigue(targetExName, currentSessionDate) {
+  const targetMuscle = getMuscleGroupForExercise(targetExName);
+  const now = currentSessionDate ? new Date(currentSessionDate + 'T12:00:00') : new Date();
+  const cutoff48 = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+
+  let totalReduction = 0;
+  const notes = [];
+
+  for (const s of data.sessions) {
+    const sessionDate = new Date(s.date + 'T12:00:00');
+    if (sessionDate >= now) continue; // skip current or future sessions
+    if (sessionDate < cutoff48) continue; // outside 48hr window
+
+    const hoursAgo = (now - sessionDate) / (1000 * 60 * 60);
+
+    // Time decay multiplier — more recent = more fatigue
+    let timeDecay = 0;
+    if (hoursAgo <= 12) timeDecay = 0.10;
+    else if (hoursAgo <= 24) timeDecay = 0.07;
+    else if (hoursAgo <= 36) timeDecay = 0.04;
+    else timeDecay = 0.02;
+
+    // Check muscle overlap
+    const sessionMuscles = (s.exercises || []).map(e => getMuscleGroupForExercise(e.name));
+    const hasCardio = sessionMuscles.includes('Cardio');
+    const hasDirectOverlap = sessionMuscles.includes(targetMuscle);
+
+    let reduction = 0;
+    let overlapType = '';
+
+    if (hasDirectOverlap) {
+      // Same muscle group trained recently — full penalty
+      reduction = timeDecay;
+      overlapType = 'direct';
+    } else if (hasCardio) {
+      // Cardio session — systemic fatigue, half penalty
+      reduction = timeDecay * 0.5;
+      overlapType = 'cardio';
+    } else if (sessionMuscles.length > 0) {
+      // Different muscle groups — small systemic fatigue
+      reduction = timeDecay * 0.25;
+      overlapType = 'systemic';
+    }
+
+    if (reduction > 0) {
+      totalReduction += reduction;
+      const hoursStr = Math.round(hoursAgo) + 'hr ago';
+      if (overlapType === 'direct') {
+        notes.push(`${targetMuscle} trained ${hoursStr}`);
+      } else if (overlapType === 'cardio') {
+        notes.push(`Cardio session ${hoursStr}`);
+      } else {
+        notes.push(`Training session ${hoursStr}`);
+      }
+    }
+  }
+
+  // Cap total reduction at 15%
+  totalReduction = Math.min(totalReduction, 0.15);
+
+  return {
+    multiplier: 1.0 - totalReduction,
+    reduction: totalReduction,
+    notes
+  };
+}
+
 // Suggest next weight/reps for progressive overload — set-pattern + fatigue-aware
 function getOverloadSuggestion(last, bw, currentPrecedingNames) {
   if (!last) return null;
   const w = last.weight;
   const sets = last.allSets;
 
-  // --- Fatigue delta ---
+  // --- Within-session fatigue delta ---
   const targetMuscle = getMuscleGroupForExercise(last.name || '');
   let fatigueDiff = 0;
   let fatigueNote = '';
-  let fatigueMultiplier = 1.0; // >1 = fresher, <1 = more fatigued
+  let fatigueMultiplier = 1.0;
 
   if (currentPrecedingNames && last.precedingExercises !== undefined) {
     const currentSameMuscle = currentPrecedingNames
@@ -2344,14 +2540,25 @@ function getOverloadSuggestion(last, bw, currentPrecedingNames) {
     const lastSameMuscle = (last.precedingExercises || [])
       .filter(e => e.muscle === targetMuscle).length;
     fatigueDiff = currentSameMuscle - lastSameMuscle;
-
-    // Each extra same-muscle exercise ≈ 3-4% fatigue penalty, cap at ±10%
     fatigueMultiplier = Math.max(0.90, Math.min(1.10, 1.0 - (fatigueDiff * 0.035)));
 
     if (fatigueDiff >= 2) fatigueNote = `⚠ ${fatigueDiff} more prior ${targetMuscle.toLowerCase()} exercises than last time`;
     else if (fatigueDiff === 1) fatigueNote = `⚠ 1 more prior ${targetMuscle.toLowerCase()} exercise than last time`;
     else if (fatigueDiff <= -2) fatigueNote = `${Math.abs(fatigueDiff)} fewer prior ${targetMuscle.toLowerCase()} exercises — fresher than usual`;
     else if (fatigueDiff === -1) fatigueNote = `1 fewer prior ${targetMuscle.toLowerCase()} exercise — slightly fresher`;
+  }
+
+  // --- 48-hour cross-session fatigue ---
+  const recent = getRecent48HrFatigue(last.name || '', new Date().toISOString().split('T')[0]);
+  if (recent.reduction > 0) {
+    fatigueMultiplier *= recent.multiplier;
+    fatigueMultiplier = Math.max(0.80, fatigueMultiplier); // floor at 80%
+    const recentNote = recent.notes[0]; // most relevant note
+    if (recentNote) {
+      fatigueNote = fatigueNote
+        ? `${fatigueNote} · ${recentNote}`
+        : `⚠ ${recentNote} — adjusted for residual fatigue`;
+    }
   }
 
   // Helper: round weight to nearest step
@@ -3857,10 +4064,29 @@ function drawShareImage(s) {
   ctx.fillStyle = '#e8ff47';
   ctx.fillRect(0, 0, 4, H);
 
-  // Header
-  ctx.fillStyle = '#e8ff47';
-  ctx.font = 'bold 13px DM Mono, monospace';
-  ctx.fillText('TOPSET', 28, 40);
+  // Logo — dumbbell T + OPSET wordmark
+  const accent = '#e8ff47';
+  const sc = 0.2;
+  const ox = 20, oy = 8;
+  const tx = n => ox + n * sc;
+  const ty = n => oy + (n - 24) * sc;
+  ctx.fillStyle = accent;
+  // T stem
+  ctx.fillRect(tx(52), ty(44), 14*sc, 112*sc);
+  // Bar
+  ctx.beginPath(); ctx.roundRect(tx(10), ty(44), 100*sc, 5*sc, 2); ctx.fill();
+  // Left inner large plate
+  ctx.beginPath(); ctx.roundRect(tx(10), ty(28), 9*sc, 36*sc, 2); ctx.fill();
+  // Left outer small plate
+  ctx.beginPath(); ctx.roundRect(tx(0), ty(34), 7*sc, 24*sc, 2); ctx.fill();
+  // Right inner large plate
+  ctx.beginPath(); ctx.roundRect(tx(101), ty(28), 9*sc, 36*sc, 2); ctx.fill();
+  // Right outer small plate
+  ctx.beginPath(); ctx.roundRect(tx(113), ty(34), 7*sc, 24*sc, 2); ctx.fill();
+  // OPSET
+  ctx.font = '500 22px "Bebas Neue", sans-serif';
+  ctx.letterSpacing = '1px';
+  ctx.fillText('OPSET', tx(72), ty(156));
 
   const dateStr = new Date(s.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
   ctx.fillStyle = '#4a4a52';
